@@ -11,10 +11,8 @@
 @synthesize delegate, contentArray, groups, backgroundColor, originalSelectionIndexes, zoomValueObserverKey, accumulatedKeyStrokes, numberOfPreRenderedRows, layoutManager;
 @dynamic visibleViewControllerArray;
 
-- (id)initWithCoder:(NSCoder *)aDecoder
+- (void)bcCommonInit
 {
-  self = [super initWithCoder:aDecoder];
-  if (self) {
     reusableViewControllers     = [[NSMutableArray alloc] init];
     visibleViewControllers      = [[NSMutableDictionary alloc] init];
     contentArray                = [[NSArray alloc] init];
@@ -32,8 +30,23 @@
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserver:self selector:@selector(scrollViewDidScroll:) name:NSViewBoundsDidChangeNotification object:enclosingClipView];
     [center addObserver:self selector:@selector(viewDidResize) name:NSViewFrameDidChangeNotification object:self];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+  self = [super initWithCoder:aDecoder];
+  if (self) {
+	  [self bcCommonInit];
   }
   return self;
+}
+
+- (id)initWithFrame:(NSRect)frameRect
+{
+	self = [super initWithFrame:frameRect];
+	if (self)
+		[self bcCommonInit];
+	return self;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
