@@ -222,11 +222,11 @@
 - (NSRange)rangeOfVisibleItemsWithOverflow
 {
   NSRange range = [self rangeOfVisibleItems];
-  NSInteger extraItems = [layoutManager maximumNumberOfItemsPerRow] * numberOfPreRenderedRows;
-  NSInteger min = range.location;
-  NSInteger max = range.location + range.length;
+  NSUInteger extraItems = [layoutManager maximumNumberOfItemsPerRow] * numberOfPreRenderedRows;
+  NSUInteger min = range.location;
+  NSUInteger max = range.location + range.length;
   
-  min = MAX(0, min-extraItems);
+  min = MAX(0UL, min-extraItems);
   max = MIN([contentArray count], max+extraItems);
   return NSMakeRange(min, max-min);
 }

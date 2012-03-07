@@ -15,7 +15,7 @@
   if ([self isCancelled])
     return;
   
-  NSInteger numberOfRows = 0;
+  NSUInteger numberOfRows = 0;
   NSInteger startingX = 0;
   NSInteger x = 0;
   NSInteger y = 0;
@@ -42,7 +42,7 @@
     y += [[collectionView delegate] topOffsetForItemsInCollectionView:collectionView];
   
   NSUInteger count = [[collectionView contentArray] count];
-  for (NSInteger i=0; i<count; i++) {
+  for (NSUInteger i=0; i<count; i++) {
     if ([self isCancelled])
       return;
     
@@ -84,8 +84,6 @@
       group = [groupEnum nextObject];
   }
   numberOfRows = MAX(numberOfRows, [[collectionView groups] count]);
-  if ([[collectionView contentArray] count] > 0 && numberOfRows == -1)
-    numberOfRows = 1;
   
   if (![self isCancelled]) {
     dispatch_async(dispatch_get_main_queue(), ^{
