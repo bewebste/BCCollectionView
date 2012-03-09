@@ -301,7 +301,7 @@
     [[viewController view] setAutoresizingMask:NSViewMaxXMargin | NSViewMaxYMargin];
     
     id itemToLoad = [contentArray objectAtIndex:anIndex];
-    [delegate collectionView:self willShowViewController:viewController forItem:itemToLoad];
+    [delegate collectionView:self willShowViewController:viewController forItem:itemToLoad atIndex:anIndex];
     [self addSubview:[viewController view]];
     if ([selectionIndexes containsIndex:anIndex])
       [self delegateUpdateSelectionForItemAtIndex:anIndex];
@@ -462,7 +462,7 @@
     if (index < [contentArray count]) {
       if ([selectionIndexes containsIndex:index])
         [self delegateUpdateDeselectionForItemAtIndex:index];
-      [delegate collectionView:self willShowViewController:controller forItem:[contentArray objectAtIndex:index]];
+      [delegate collectionView:self willShowViewController:controller forItem:[contentArray objectAtIndex:index] atIndex:index];
     } else {
       if ([selectionIndexes containsIndex:index])
         [self delegateUpdateDeselectionForItemAtIndex:index];
@@ -540,7 +540,7 @@
     NSViewController *viewController = [self viewControllerForItemAtIndex:[layoutItem itemIndex]];
     if (viewController) {
       [[viewController view] setFrame:[layoutItem itemRect]];
-      [delegate collectionView:self willShowViewController:viewController forItem:[contentArray objectAtIndex:[layoutItem itemIndex]]];
+      [delegate collectionView:self willShowViewController:viewController forItem:[contentArray objectAtIndex:[layoutItem itemIndex]] atIndex:[layoutItem itemIndex]];
     } else if (NSIntersectsRect(visibleRect, [layoutItem itemRect]))
       [self addMissingViewControllerForItemAtIndex:[layoutItem itemIndex] withFrame:[layoutItem itemRect]];
   } completionBlock:^{
