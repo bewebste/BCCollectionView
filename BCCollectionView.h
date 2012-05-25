@@ -34,12 +34,9 @@
   NSIndexSet *originalSelectionIndexes;
   NSInteger dragHoverIndex;
   
-  BOOL isDragging;
-  BOOL firstDrag;
   BOOL selectionChangedDisabled;
   
   NSString *zoomValueObserverKey;
-  CGFloat lastPinchMagnification;
   
   NSString *accumulatedKeyStrokes;
 }
