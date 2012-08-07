@@ -66,27 +66,28 @@
 
 - (void)dealloc
 {
-  [self removeObserver:self forKeyPath:@"backgroundColor"];
-  [[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:zoomValueObserverKey];
+	[self removeObserver:self forKeyPath:@"backgroundColor"];
+	if (zoomValueObserverKey !=	nil)
+		[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:zoomValueObserverKey];
 
-  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-  [center removeObserver:self name:NSViewBoundsDidChangeNotification object:[[self enclosingScrollView] contentView]];
-  [center removeObserver:self name:NSViewFrameDidChangeNotification object:self];
-  
-  for (BCCollectionViewGroup *group in groups)
-    [group removeObserver:self forKeyPath:@"isCollapsed"];
-  
-  [layoutManager release];
-  [reusableViewControllers release];
-  [visibleViewControllers release];
-  [visibleGroupViewControllers release];
-  [contentArray release];
-  [groups release];
-  [selectionIndexes release];
-  [originalSelectionIndexes release];
-  [accumulatedKeyStrokes release];
-  [zoomValueObserverKey release];
-  [super dealloc];
+	NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+	[center removeObserver:self name:NSViewBoundsDidChangeNotification object:[[self enclosingScrollView] contentView]];
+	[center removeObserver:self name:NSViewFrameDidChangeNotification object:self];
+
+	for (BCCollectionViewGroup *group in groups)
+		[group removeObserver:self forKeyPath:@"isCollapsed"];
+
+	[layoutManager release];
+	[reusableViewControllers release];
+	[visibleViewControllers release];
+	[visibleGroupViewControllers release];
+	[contentArray release];
+	[groups release];
+	[selectionIndexes release];
+	[originalSelectionIndexes release];
+	[accumulatedKeyStrokes release];
+	[zoomValueObserverKey release];
+	[super dealloc];
 }
 
 - (BOOL)isFlipped
@@ -294,18 +295,20 @@
 
 - (void)addMissingViewControllerForItemAtIndex:(NSUInteger)anIndex withFrame:(NSRect)aRect
 {
-  if (anIndex < [contentArray count]) {
-    NSViewController *viewController = [self emptyViewControllerForInsertion];
-    [visibleViewControllers setObject:viewController forKey:[NSNumber numberWithInteger:anIndex]];
-    [[viewController view] setFrame:aRect];
-    [[viewController view] setAutoresizingMask:NSViewMaxXMargin | NSViewMaxYMargin];
-    
-    id itemToLoad = [contentArray objectAtIndex:anIndex];
-    [delegate collectionView:self willShowViewController:viewController forItem:itemToLoad atIndex:anIndex];
-    [self addSubview:[viewController view]];
-    if ([selectionIndexes containsIndex:anIndex])
-      [self delegateUpdateSelectionForItemAtIndex:anIndex];
-  }
+	if (anIndex < [contentArray count]) {
+		NSViewController *viewController = [self emptyViewControllerForInsertion];
+		if (viewController != nil) {
+			[visibleViewControllers setObject:viewController forKey:[NSNumber numberWithInteger:anIndex]];
+			[[viewController view] setFrame:aRect];
+			[[viewController view] setAutoresizingMask:NSViewMaxXMargin | NSViewMaxYMargin];
+
+			id itemToLoad = [contentArray objectAtIndex:anIndex];
+			[delegate collectionView:self willShowViewController:viewController forItem:itemToLoad atIndex:anIndex];
+			[self addSubview:[viewController view]];
+			if ([selectionIndexes containsIndex:anIndex])
+			[self delegateUpdateSelectionForItemAtIndex:anIndex];
+		}
+	}
 }
 
 - (void)addMissingGroupHeaders
