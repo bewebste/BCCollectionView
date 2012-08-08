@@ -260,10 +260,18 @@
   return [visibleViewControllers objectForKey:[NSNumber numberWithInteger:index]];
 }
 
+- (NSIndexSet*)indexesOfMissingViewControllers
+{
+    return [[NSIndexSet indexSetWithIndexesInRange:[self rangeOfVisibleItemsWithOverflow]] indexesPassingTest:^BOOL(NSUInteger idx, BOOL *stop) {
+		return (![visibleViewControllers objectForKey:[NSNumber numberWithInteger:idx]]);
+    }];
+}
+
 #pragma mark Swapping ViewControllers in and out
 
 - (void)removeViewControllerForItemAtIndex:(NSUInteger)anIndex
 {
+//	NSLog(@"removing view controller at index %lu", anIndex);
   NSNumber *key = [NSNumber numberWithInteger:anIndex];
   NSViewController *viewController = [visibleViewControllers objectForKey:key];
   [[viewController view] removeFromSuperview];
@@ -278,6 +286,7 @@
 
 - (void)removeInvisibleViewControllers
 {
+//	NSLog(@"removeInvisibleViewControllers dispatch");
   [[self indexesOfInvisibleViewControllers] enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
     [self removeViewControllerForItemAtIndex:idx];
   }];
@@ -298,6 +307,7 @@
 	if (anIndex < [contentArray count]) {
 		NSViewController *viewController = [self emptyViewControllerForInsertion];
 		if (viewController != nil) {
+//			NSLog(@"adding view controller at index %lu", anIndex);
 			[visibleViewControllers setObject:viewController forKey:[NSNumber numberWithInteger:anIndex]];
 			[[viewController view] setFrame:aRect];
 			[[viewController view] setAutoresizingMask:NSViewMaxXMargin | NSViewMaxYMargin];
@@ -338,6 +348,7 @@
 - (void)addMissingViewControllersToView
 {
   dispatch_async(dispatch_get_main_queue(), ^{
+//	  NSLog(@"addMisingViewControllersToView dispatch");
     [[NSIndexSet indexSetWithIndexesInRange:[self rangeOfVisibleItemsWithOverflow]] enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
       if (![visibleViewControllers objectForKey:[NSNumber numberWithInteger:idx]]) {
         [self addMissingViewControllerForItemAtIndex:idx withFrame:[layoutManager rectOfItemAtIndex:idx]];
@@ -555,11 +566,19 @@
 
 - (void)scrollViewDidScroll:(NSNotification *)note
 {
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [self removeInvisibleViewControllers];
-    [self addMissingViewControllersToView];
-  });
-  
+	if ([[self indexesOfInvisibleViewControllers] count] > 0)
+	{
+	  dispatch_async(dispatch_get_main_queue(), ^{
+//		  NSLog(@"scrollViewDidScroll dispatch");
+		[self removeInvisibleViewControllers];
+	  });
+	}
+	if ([[self indexesOfMissingViewControllers] count] > 0)
+	{
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self addMissingViewControllersToView];
+		});
+	}
   if ([delegate respondsToSelector:@selector(collectionViewDidScroll:inDirection:)]) {
     if ([self visibleRect].origin.y > previousFrameBounds.origin.y)
       [delegate collectionViewDidScroll:self inDirection:BCCollectionViewScrollDirectionDown];
