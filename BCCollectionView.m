@@ -29,7 +29,7 @@
     [enclosingClipView setPostsBoundsChangedNotifications:YES];
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserver:self selector:@selector(scrollViewDidScroll:) name:NSViewBoundsDidChangeNotification object:enclosingClipView];
-    [center addObserver:self selector:@selector(viewDidResize) name:NSViewFrameDidChangeNotification object:self];
+    [center addObserver:self selector:@selector(viewDidResize:) name:NSViewFrameDidChangeNotification object:self];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder
@@ -588,7 +588,7 @@
   }
 }
 
-- (void)viewDidResize
+- (void)viewDidResize:(NSNotification*)notification
 {
   if ([contentArray count] > 0 && [visibleViewControllers count] > 0)
     [self softReloadDataWithCompletionBlock:NULL];
