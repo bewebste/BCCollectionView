@@ -7,6 +7,13 @@
 #import "BCCollectionViewLayoutItem.h"
 #import "BCCollectionViewGroup.h"
 
+@interface BCCollectionView (ZoomDeclarations)
+
+//Declare this here to avoid compiler warnings about undeclared selector
+- (void)zoomValueDidChange;
+
+@end
+
 @implementation BCCollectionView
 @synthesize delegate, contentArray, groups, backgroundColor, originalSelectionIndexes, zoomValueObserverKey, accumulatedKeyStrokes, numberOfPreRenderedRows, layoutManager;
 @dynamic visibleViewControllerArray;
