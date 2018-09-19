@@ -27,11 +27,13 @@
     dragHoverIndex              = NSNotFound;
     accumulatedKeyStrokes       = [[NSString alloc] init];
     numberOfPreRenderedRows     = 3;
+	_drawsBackground            = YES;
     layoutManager               = [[BCCollectionViewLayoutManager alloc] initWithCollectionView:self];
     visibleGroupViewControllers = [[NSMutableDictionary alloc] init];
     
     [self addObserver:self forKeyPath:@"backgroundColor" options:0 context:NULL];
-    
+	[self addObserver:self forKeyPath:@"drawsBackground" options:0 context:NULL];
+
     NSClipView *enclosingClipView = [[self enclosingScrollView] contentView];
     [enclosingClipView setPostsBoundsChangedNotifications:YES];
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
@@ -58,7 +60,7 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if ([keyPath isEqualToString:@"backgroundColor"])
+  if ([keyPath isEqualToString:@"backgroundColor"] || [keyPath isEqualToString:@"drawsBackground"])
     [self setNeedsDisplay:YES];
   else if ([keyPath isEqual:zoomValueObserverKey]) {
     if ([self respondsToSelector:@selector(zoomValueDidChange)])
@@ -74,6 +76,7 @@
 - (void)dealloc
 {
 	[self removeObserver:self forKeyPath:@"backgroundColor"];
+	[self removeObserver:self forKeyPath:@"drawsBackground"];
 	if (zoomValueObserverKey !=	nil)
 		[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:zoomValueObserverKey];
 
@@ -131,8 +134,11 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-//  [backgroundColor ? backgroundColor : [NSColor whiteColor] set];
-//  NSRectFill(dirtyRect);
+	if (self.drawsBackground)
+	{
+	  [backgroundColor ? backgroundColor : [NSColor whiteColor] set];
+	  NSRectFill(dirtyRect);
+	}
   
   [[NSColor grayColor] set];
   NSFrameRect(BCRectFromTwoPoints(mouseDownLocation, mouseDraggedLocation));

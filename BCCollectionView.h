@@ -42,6 +42,7 @@
 }
 @property (nonatomic, assign) __unsafe_unretained id<BCCollectionViewDelegate> delegate;
 @property (nonatomic, retain) NSColor *backgroundColor;
+@property BOOL drawsBackground;
 @property (nonatomic) NSUInteger numberOfPreRenderedRows;
 
 //private
