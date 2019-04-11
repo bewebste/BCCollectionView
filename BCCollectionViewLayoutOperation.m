@@ -82,7 +82,7 @@
     
     if (layoutCallBack != nil) {
       dispatch_async(dispatch_get_main_queue(), ^{
-        layoutCallBack(item);
+		  self->layoutCallBack(item);
       });
     }
     if ([group itemRange].location + [group itemRange].length-1 == i)
@@ -92,17 +92,10 @@
   
   if (![self isCancelled]) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      [[collectionView layoutManager] setItemLayouts:newLayouts];
-      layoutCompletionBlock();
+		[[self->collectionView layoutManager] setItemLayouts:newLayouts];
+		self->layoutCompletionBlock();
     });
   }
-}
-
-- (void)dealloc
-{
-  [layoutCallBack release];
-  [layoutCompletionBlock release];
-  [super dealloc];
 }
 
 @end

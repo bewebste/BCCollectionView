@@ -14,8 +14,18 @@
 
 @end
 
+@interface BCCollectionView()
+
+@property NSMutableDictionary *visibleGroupViewControllers;
+@property NSMutableDictionary *visibleViewControllers;
+
+@end
+
 @implementation BCCollectionView
 @synthesize delegate, contentArray, groups, backgroundColor, originalSelectionIndexes, zoomValueObserverKey, accumulatedKeyStrokes, numberOfPreRenderedRows, layoutManager;
+@synthesize visibleGroupViewControllers=visibleGroupViewControllers;
+@synthesize visibleViewControllers=visibleViewControllers;
+
 @dynamic visibleViewControllerArray;
 
 - (void)bcCommonInit
@@ -86,18 +96,6 @@
 
 	for (BCCollectionViewGroup *group in groups)
 		[group removeObserver:self forKeyPath:@"isCollapsed"];
-
-	[layoutManager release];
-	[reusableViewControllers release];
-	[visibleViewControllers release];
-	[visibleGroupViewControllers release];
-	[contentArray release];
-	[groups release];
-	[selectionIndexes release];
-	[originalSelectionIndexes release];
-	[accumulatedKeyStrokes release];
-	[zoomValueObserverKey release];
-	[super dealloc];
 }
 
 - (BOOL)isFlipped
@@ -276,7 +274,7 @@
 - (NSIndexSet*)indexesOfMissingViewControllers
 {
     return [[NSIndexSet indexSetWithIndexesInRange:[self rangeOfVisibleItemsWithOverflow]] indexesPassingTest:^BOOL(NSUInteger idx, BOOL *stop) {
-		return (![visibleViewControllers objectForKey:[NSNumber numberWithInteger:idx]]);
+		return (![self.visibleViewControllers objectForKey:[NSNumber numberWithInteger:idx]]);
     }];
 }
 
@@ -308,7 +306,7 @@
 - (NSViewController *)emptyViewControllerForInsertion
 {
   if ([reusableViewControllers count] > 0) {
-    NSViewController *viewController = [[[reusableViewControllers lastObject] retain] autorelease];
+    NSViewController *viewController = [reusableViewControllers lastObject];
     [reusableViewControllers removeLastObject];
     return viewController;
   } else
@@ -338,21 +336,21 @@
 {
   if ([groups count] > 0) {
     [groups enumerateObjectsUsingBlock:^(id group, NSUInteger idx, BOOL *stop) {
-      NSRect groupRect = NSMakeRect(0, NSMinY([layoutManager rectOfItemAtIndex:[group itemRange].location])-[self groupHeaderHeight], NSWidth([self visibleRect]), [self groupHeaderHeight]);
-      if (idx == 0 && ![group isCollapsed] && [delegate respondsToSelector:@selector(topOffsetForItemsInCollectionView:)])
-        groupRect.origin.y -= [delegate topOffsetForItemsInCollectionView:self];
+      NSRect groupRect = NSMakeRect(0, NSMinY([self.layoutManager rectOfItemAtIndex:[group itemRange].location])-[self groupHeaderHeight], NSWidth([self visibleRect]), [self groupHeaderHeight]);
+      if (idx == 0 && ![group isCollapsed] && [self.delegate respondsToSelector:@selector(topOffsetForItemsInCollectionView:)])
+        groupRect.origin.y -= [self.delegate topOffsetForItemsInCollectionView:self];
       
       BOOL groupShouldBeVisible = NSIntersectsRect(groupRect, [self visibleRect]);
-      NSViewController *groupViewController = [visibleGroupViewControllers objectForKey:[NSNumber numberWithInteger:idx]];
+      NSViewController *groupViewController = [self.visibleGroupViewControllers objectForKey:[NSNumber numberWithInteger:idx]];
       [[groupViewController view] setFrame:groupRect];
       if (groupShouldBeVisible && !groupViewController) {
-        groupViewController = [delegate collectionView:self headerForGroup:group];
+        groupViewController = [self.delegate collectionView:self headerForGroup:group];
         [self addSubview:[groupViewController view]];
-        [visibleGroupViewControllers setObject:groupViewController forKey:[NSNumber numberWithInteger:idx]];
+        [self.visibleGroupViewControllers setObject:groupViewController forKey:[NSNumber numberWithInteger:idx]];
         [[groupViewController view] setFrame:groupRect];
       } else if (!groupShouldBeVisible && groupViewController) {
         [[groupViewController view] removeFromSuperview];
-        [visibleGroupViewControllers removeObjectForKey:[NSNumber numberWithInteger:idx]];
+        [self.visibleGroupViewControllers removeObjectForKey:[NSNumber numberWithInteger:idx]];
       }
     }];
   }
@@ -363,8 +361,8 @@
   dispatch_async(dispatch_get_main_queue(), ^{
 //	  NSLog(@"addMisingViewControllersToView dispatch");
     [[NSIndexSet indexSetWithIndexesInRange:[self rangeOfVisibleItemsWithOverflow]] enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-      if (![visibleViewControllers objectForKey:[NSNumber numberWithInteger:idx]]) {
-        [self addMissingViewControllerForItemAtIndex:idx withFrame:[layoutManager rectOfItemAtIndex:idx]];
+      if (![self.visibleViewControllers objectForKey:[NSNumber numberWithInteger:idx]]) {
+        [self addMissingViewControllerForItemAtIndex:idx withFrame:[self.layoutManager rectOfItemAtIndex:idx]];
       }
     }];
     [self addMissingGroupHeaders];
@@ -567,7 +565,7 @@
     NSViewController *viewController = [self viewControllerForItemAtIndex:[layoutItem itemIndex]];
     if (viewController) {
       [[viewController view] setFrame:[layoutItem itemRect]];
-      [delegate collectionView:self willShowViewController:viewController forItem:[contentArray objectAtIndex:[layoutItem itemIndex]] atIndex:[layoutItem itemIndex]];
+      [self.delegate collectionView:self willShowViewController:viewController forItem:[self.contentArray objectAtIndex:[layoutItem itemIndex]] atIndex:[layoutItem itemIndex]];
     } else if (NSIntersectsRect(visibleRect, [layoutItem itemRect]))
       [self addMissingViewControllerForItemAtIndex:[layoutItem itemIndex] withFrame:[layoutItem itemRect]];
   } completionBlock:^{

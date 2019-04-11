@@ -34,14 +34,7 @@
   
 // if ([queue operationCount] > 10)
     [queue cancelAllOperations];
-  [queue addOperation:[operation autorelease]];
-}
-
-- (void)dealloc
-{
-  [itemLayouts release];
-  [queue release];
-  [super dealloc];
+  [queue addOperation:operation];
 }
 
 #pragma mark -
